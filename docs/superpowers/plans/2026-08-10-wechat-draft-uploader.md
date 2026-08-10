@@ -28,10 +28,10 @@
 - `find_local_images(html: str, markdown_path: Path) -> list[Path]`
 - `replace_image_sources(html: str, replacements: dict[Path, str], markdown_path: Path) -> str`
 
-- [ ] Write failing tests for headings/paragraphs, local image discovery, and source replacement.
-- [ ] Run `uv run pytest tests/test_markdown.py -q` and observe the expected missing-module failure.
-- [ ] Implement the minimum safe Markdown renderer and image replacement helpers.
-- [ ] Run the focused tests and confirm they pass.
+- [x] Write failing tests for headings/paragraphs, local image discovery, and source replacement.
+- [x] Run `uv run pytest tests/test_markdown.py -q` and observe the expected missing-module failure.
+- [x] Implement the minimum safe Markdown renderer and image replacement helpers.
+- [x] Run the focused tests and confirm they pass.
 
 ### Task 2: WeChat API Client
 
@@ -43,10 +43,10 @@
 - `WeChatClient.create_draft(title, author, digest, html, cover_path, body_images) -> dict[str, Any]`
 - `WeChatConfig(app_id: str, app_secret: str)`
 
-- [ ] Write failing tests for token retrieval, cover upload, body-image upload, draft creation, and secret redaction.
-- [ ] Run the focused tests and observe failure before implementation.
-- [ ] Implement the four required API calls with injectable HTTP opener.
-- [ ] Run the focused tests and confirm fake API flow passes.
+- [x] Write failing tests for token retrieval, cover upload, body-image upload, draft creation, and secret redaction.
+- [x] Run the focused tests and observe failure before implementation.
+- [x] Implement the four required API calls with injectable HTTP opener.
+- [x] Run the focused tests and confirm fake API flow passes.
 
 ### Task 3: CLI and Configuration
 
@@ -64,16 +64,16 @@
 - Preview: add `--dry-run` to render HTML and skip all HTTP calls.
 - Output: `draft-result.json` with status, paths, image count, and redacted error only.
 
-- [ ] Write failing tests for argument validation, dry-run output, and secret-free metadata.
-- [ ] Implement the CLI and environment-file loading.
-- [ ] Run all tests and then a local dry-run against the generated article.
+- [x] Write failing tests for argument validation, dry-run output, and secret-free metadata.
+- [x] Implement the CLI and environment-file loading.
+- [x] Run all tests and then a local dry-run against the generated article.
 
 ### Task 4: Public GitHub Repository
 
 **Files:**
 - Git repository: `/home/admin/wechat-draft-uploader`
 
-- [ ] Run the full test suite and `git diff --check`.
-- [ ] Initialize Git, commit only project files, and verify no secrets are tracked.
-- [ ] Create public repository `ACBBZ/wechat-draft-uploader`.
-- [ ] Push `main` and verify the remote repository URL.
+- [x] Run the full test suite and `git diff --check`.
+- [x] Initialize Git, commit only project files, and verify no secrets are tracked.
+- [x] Create public repository `ACBBZ/wechat-draft-uploader`.
+- [x] Push `main` and verify the remote repository URL.
