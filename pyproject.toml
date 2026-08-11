@@ -1,7 +1,7 @@
 [project]
 name = "wechat-draft-uploader"
-version = "0.1.0"
-description = "Upload a local Markdown article to the WeChat Official Account draft box."
+version = "0.2.0"
+description = "将本地 Markdown 转换为微信公众号图文并上传到草稿箱的 Agent Skill。"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
