@@ -1,10 +1,6 @@
 ---
 name: wechat-draft-uploader
 description: 当需要把本地 Markdown 预览为微信公众号图文、上传到公众号草稿箱、处理正文图片或排查草稿上传失败时使用。
-compatibility: 需要 Python 3.11+ 和 uv；真实上传需要能访问 api.weixin.qq.com，并通过外部环境配置 WECHAT_APP_ID 与 WECHAT_APP_SECRET。
-metadata:
-  language: zh-CN
-  version: "0.5.0"
 ---
 
 # 微信公众号草稿上传
@@ -13,15 +9,17 @@ metadata:
 
 把用户明确指定的本地 Markdown 转换为微信公众号图文内容，并创建草稿。**只创建草稿，不执行群发、正式发布或删除。**
 
-本集成版基于 `ACBBZ/wechat-draft-uploader` v0.2.0，并针对 `fin-article-writer` 的 `article.md + cover.png + images/*.png` 输出增加公众号排版增强：正文双换行形成带段间距的独立段落、`##` 小标题 20px 加粗、信息来源区使用项目符号，并在条目之间保留明显空隙。
+当前 0.5.0 集成版本针对 `fin-article-writer` 的 `article.md + cover.png + images/*.png` 输出增加公众号排版增强：正文双换行形成带段间距的独立段落、`##` 小标题 20px 加粗、信息来源区使用项目符号，并在条目之间保留明显空隙。
 
 ## 执行前
+
+运行环境需要 Python 3.11+ 和 `uv`；真实上传还需要能访问 `api.weixin.qq.com`。
 
 1. 确定本 `SKILL.md` 所在目录，记为 `$SKILL_DIR`。
 2. 只处理用户或上游 Writer 明确指定的 Markdown 文件。
 3. 真实上传必须有本地封面；本集成流程使用 `cover.png`。
 4. 凭据只从环境变量或外部环境文件读取：`WECHAT_APP_ID`、`WECHAT_APP_SECRET`、`WECHAT_AUTHOR`（可选）、`WECHAT_TIMEOUT_SECONDS`（可选）。
-5. 不得在命令参数、日志、回复、源码、Skill、ZIP 或内容包中回显 `WECHAT_APP_SECRET` 或 `access_token`。
+5. 不得在命令参数、日志、回复、源码、Skill、仓库或内容包中回显 `WECHAT_APP_SECRET` 或 `access_token`。
 6. 本地正文图片支持 `.jpg`、`.jpeg`、`.png`；与 `fin-article-writer` 联动时正文图片统一为 `.png`。
 7. Markdown 转 HTML 时，正文两个换行符形成独立段落，并为正文段落设置明显段后间距；所有 `##` 二级标题使用 20px 字号、700 字重；“信息来源”固定区使用 14px 项目列表样式，每条保留项目符号，并在条目之间留出空隙。
 

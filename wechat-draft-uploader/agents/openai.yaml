@@ -1,0 +1,4 @@
+interface:
+  display_name: "微信公众号草稿上传"
+  short_description: "预览本地 Markdown 并安全创建微信公众号图文草稿"
+  default_prompt: "使用 $wechat-draft-uploader 预览这篇 Markdown，并在确认后创建微信公众号草稿。"
