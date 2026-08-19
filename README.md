@@ -231,14 +231,20 @@ cd wechat-draft-uploader
 uv run pytest -q
 ```
 
-## 目录结构
+## GitHub 仓库结构
+
+当前 GitHub 仓库 slug 仍为 `ACBBZ/wechat-draft-uploader`，项目内容名称已经统一为 `wechat-fin-arcticle-skill`。完整三 Skill 源码和安装文件打包在 `wechat-fin-arcticle-skill-v2.5.zip` 中；三个核心 `SKILL.md` 也放在 `docs/skills/` 方便在线阅读。
 
 ```text
-wechat-fin-arcticle-skill/
+repository/
 ├── README.md
 ├── install.sh
 ├── manifest.json
-├── fin-article-writer/
-├── wechat-cover-generator/
-└── wechat-draft-uploader/
+├── wechat-fin-arcticle-skill-v2.5.zip
+└── docs/skills/
+    ├── fin-article-writer-SKILL.md
+    ├── wechat-cover-generator-SKILL.md
+    └── wechat-draft-uploader-SKILL.md
 ```
+
+运行 `bash install.sh` 后，ZIP 会解压并把三个完整 Skill 安装到 `$HOME/.agents/skills/`。
