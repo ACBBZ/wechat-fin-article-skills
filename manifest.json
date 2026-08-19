@@ -1,0 +1,11 @@
+{
+  "project": "wechat-fin-arcticle-skill",
+  "version": "2.5.0",
+  "bundle": "wechat-fin-arcticle-skill-v2.5.zip",
+  "skills": {
+    "fin-article-writer": "2.5.0",
+    "wechat-cover-generator": "1.1.0",
+    "wechat-draft-uploader": "0.5.0"
+  },
+  "credentials_included": false
+}

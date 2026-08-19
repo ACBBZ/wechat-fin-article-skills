@@ -1,6 +1,7 @@
-.env
-.venv/
 __pycache__/
+*.py[cod]
 .pytest_cache/
-draft-result.json
-preview.html
+.venv/
+.env
+dist/
+.DS_Store
