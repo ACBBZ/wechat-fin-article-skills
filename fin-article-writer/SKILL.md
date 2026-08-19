@@ -25,7 +25,7 @@ description: 当需要把中文财经或投资选题写成经过研究、核查�
 - 权利状态不明确的图片不能自动进入发布稿。
 - 封面生成失败不影响文章本身交付。
 - 第 11 步只允许创建微信公众号草稿，不得群发、正式发布或删除；实际上传前必须先 dry-run。
-- 微信公众号 `AppID` / `AppSecret` 只能从外部环境变量或 `$HOME/.config/wechat-draft-uploader/.env` 读取，绝不能写进 Skill、ZIP、`article-package.json`、日志或命令参数。
+- 微信公众号 `AppID` / `AppSecret` 只能从外部环境变量或 `$HOME/.config/wechat-draft-uploader/.env` 读取，绝不能写进 Skill、仓库、`article-package.json`、日志或命令参数。
 
 ## 工作流程
 

@@ -1,0 +1,353 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/fin-article-writer/article-package.schema.json",
+  "title": "财经公众号文章内容包",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "topic",
+    "main_title",
+    "alternative_titles",
+    "core_event",
+    "core_judgment",
+    "reader_stake",
+    "research",
+    "article",
+    "images",
+    "cover",
+    "sources",
+    "wechat_draft"
+  ],
+  "properties": {
+    "topic": {
+      "type": "string",
+      "minLength": 1
+    },
+    "main_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "alternative_titles": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "core_event": {
+      "type": "string"
+    },
+    "core_judgment": {
+      "type": "string"
+    },
+    "reader_stake": {
+      "type": "string"
+    },
+    "research": {
+      "type": "object",
+      "required": [
+        "current_event",
+        "historical_context",
+        "counter_evidence"
+      ],
+      "properties": {
+        "current_event": {
+          "type": "object"
+        },
+        "historical_context": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "counter_evidence": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "article": {
+      "type": "object",
+      "required": [
+        "path",
+        "word_count"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "const": "article.md"
+        },
+        "word_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "copyright_status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "current_event",
+              "primary_evidence",
+              "historical_context",
+              "explanatory_data"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "pattern": ".*\\.png$"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "related_paragraph": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": "string"
+          },
+          "event_date": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "copyright_status": {
+            "type": "string",
+            "enum": [
+              "AUTO_INSERT",
+              "CANDIDATE_ONLY",
+              "REJECT"
+            ]
+          },
+          "placement": {
+            "type": "string",
+            "enum": [
+              "before_subtitle_1",
+              "before_subtitle_2",
+              "other"
+            ]
+          }
+        },
+        "additionalProperties": true
+      },
+      "minItems": 2,
+      "maxItems": 12,
+      "contains": {
+        "type": "object",
+        "properties": {
+          "copyright_status": {
+            "const": "AUTO_INSERT"
+          }
+        },
+        "required": [
+          "copyright_status",
+          "path",
+          "placement"
+        ]
+      },
+      "minContains": 2
+    },
+    "cover": {
+      "type": "object",
+      "required": [
+        "status",
+        "mode",
+        "cover_context"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "generated",
+            "prompt_only",
+            "failed"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "general",
+            "emotion_meme"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "fallback_prompt": {
+          "type": "string"
+        },
+        "cover_context": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "generated"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "path"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "prompt_only"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "prompt"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ]
+          }
+        }
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title",
+          "tier"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "T1",
+              "T2",
+              "T3",
+              "T4"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "wechat_draft": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "disabled",
+            "dry_run",
+            "created",
+            "failed",
+            "skipped_no_cover",
+            "skipped_no_credentials"
+          ]
+        },
+        "draft_media_id": {
+          "type": "string"
+        },
+        "result_path": {
+          "type": "string"
+        },
+        "preview_path": {
+          "type": "string"
+        },
+        "body_image_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "created"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "draft_media_id",
+              "result_path",
+              "preview_path",
+              "body_image_count"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "财经公众号文章写作"
+  short_description: "研究、核查并生成结构完整且可发布的中文财经公众号文章内容包"
+  default_prompt: "使用 $fin-article-writer 将这个财经选题研究、核查并整理成可发布的微信公众号文章。"
