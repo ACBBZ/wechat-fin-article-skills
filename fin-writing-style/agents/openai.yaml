@@ -1,0 +1,4 @@
+interface:
+  display_name: "财经公众号写作风格"
+  short_description: "把已核验内容改写成 3000–3600 字、有第一人称作者感和自然叙事节奏的公众号长文"
+  default_prompt: "使用 $fin-writing-style 在不改变已确认事实的前提下，把这些素材写成 3000–3600 字、有作者感、口语节奏和明确判断的微信公众号长文。"
