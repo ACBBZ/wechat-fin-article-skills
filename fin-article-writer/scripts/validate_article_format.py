@@ -6,6 +6,10 @@ from pathlib import Path
 
 SENTENCE_END = re.compile(r"[。！？!?]")
 SOURCE_LINE = re.compile(r"^[^：\n]+：《[^》\n]+》，.+。$")
+VISIBLE_BODY_MIN = 3000
+VISIBLE_BODY_MAX = 3600
+MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^\)]+\)")
+MARKDOWN_DECORATION = re.compile(r"[*_~`>]")
 
 
 def _paragraphs(lines: list[str], end: int) -> list[tuple[int, str]]:
@@ -35,19 +39,40 @@ def _is_body_content_line(stripped: str) -> bool:
     return bool(stripped) and not stripped.startswith(("#", "![", "*图：", ">", "---"))
 
 
+def _visible_body_char_count(lines: list[str], end: int) -> int:
+    visible_lines: list[str] = []
+    for raw in lines[:end]:
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(("#", "![", "*图：", "---")):
+            continue
+        text = stripped.lstrip("> ")
+        text = MARKDOWN_LINK.sub(r"\1", text)
+        text = MARKDOWN_DECORATION.sub("", text)
+        visible_lines.append(text)
+    return len(re.sub(r"\s+", "", "".join(visible_lines)))
+
+
 def validate_article(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
     errors: list[str] = []
 
-    h2_lines = [idx for idx, line in enumerate(lines, start=1) if line.startswith("## ")]
-    if len(h2_lines) != 2:
-        errors.append(f"小标题数量错误：需要恰好 2 个 `##` 小标题，当前为 {len(h2_lines)} 个。")
-
     source_indexes = [idx for idx, line in enumerate(lines) if line.strip() == "**信息来源**"]
     source_index = source_indexes[-1] if source_indexes else len(lines)
     if not source_indexes:
         errors.append("信息来源缺失：文末必须包含 `**信息来源**`。")
+
+    visible_body_chars = _visible_body_char_count(lines, source_index)
+    if visible_body_chars < VISIBLE_BODY_MIN:
+        errors.append(
+            f"正文可见字数不足：需要 {VISIBLE_BODY_MIN}–{VISIBLE_BODY_MAX} 字，当前为 {visible_body_chars} 字。"
+        )
+    elif visible_body_chars > VISIBLE_BODY_MAX:
+        errors.append(
+            f"正文可见字数超限：需要 {VISIBLE_BODY_MIN}–{VISIBLE_BODY_MAX} 字，当前为 {visible_body_chars} 字。"
+        )
 
     # 硬约束：正文完整句子后必须是一个空白行，也就是 Markdown 中至少两个换行符。
     for idx, raw in enumerate(lines[:source_index]):
@@ -131,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print("公众号文章格式校验通过：每句后两个换行、2 个小标题、信息来源使用项目符号且条目间留空行。")
+    print("公众号文章格式校验通过：正文 3000–3600 可见字、每句后两个换行、信息来源格式统一。")
     return 0
 
 

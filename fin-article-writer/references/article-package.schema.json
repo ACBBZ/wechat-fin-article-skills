@@ -12,7 +12,9 @@
     "core_judgment",
     "reader_stake",
     "research",
+    "style",
     "article",
+    "section_anchors",
     "images",
     "cover",
     "sources",
@@ -71,16 +73,62 @@
       },
       "additionalProperties": true
     },
+    "style": {
+      "type": "object",
+      "required": [
+        "skill",
+        "status",
+        "article_type",
+        "tone_intensity",
+        "first_person"
+      ],
+      "properties": {
+        "skill": {
+          "type": "string",
+          "const": "fin-writing-style"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "generated",
+            "failed"
+          ]
+        },
+        "article_type": {
+          "type": "string"
+        },
+        "tone_intensity": {
+          "type": "string",
+          "enum": [
+            "restrained",
+            "natural",
+            "spicy"
+          ]
+        },
+        "first_person": {
+          "type": "boolean"
+        },
+        "quality": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    },
     "article": {
       "type": "object",
       "required": [
         "path",
-        "word_count"
+        "visible_char_count"
       ],
       "properties": {
         "path": {
           "type": "string",
           "const": "article.md"
+        },
+        "visible_char_count": {
+          "type": "integer",
+          "minimum": 3000,
+          "maximum": 3600
         },
         "word_count": {
           "type": "integer",
@@ -88,6 +136,33 @@
         }
       },
       "additionalProperties": true
+    },
+    "section_anchors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "purpose"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "related_paragraph": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
     },
     "images": {
       "type": "array",
@@ -108,12 +183,19 @@
               "current_event",
               "primary_evidence",
               "historical_context",
-              "explanatory_data"
+              "explanatory_data",
+              "mechanism_explainer",
+              "timeline",
+              "explanatory_visual"
             ]
           },
           "path": {
             "type": "string",
             "pattern": ".*\\.png$"
+          },
+          "anchor_id": {
+            "type": "string",
+            "minLength": 1
           },
           "subject": {
             "type": "string"
@@ -141,18 +223,18 @@
               "REJECT"
             ]
           },
-          "placement": {
+          "generation_kind": {
             "type": "string",
             "enum": [
-              "before_subtitle_1",
-              "before_subtitle_2",
-              "other"
+              "documentary",
+              "data_generated",
+              "ai_explanatory"
             ]
           }
         },
         "additionalProperties": true
       },
-      "minItems": 2,
+      "minItems": 3,
       "maxItems": 12,
       "contains": {
         "type": "object",
@@ -164,17 +246,18 @@
         "required": [
           "copyright_status",
           "path",
-          "placement"
+          "anchor_id"
         ]
       },
-      "minContains": 2
+      "minContains": 3
     },
     "cover": {
       "type": "object",
       "required": [
         "status",
         "mode",
-        "cover_context"
+        "cover_context",
+        "style_reference"
       ],
       "properties": {
         "status": {
@@ -206,6 +289,47 @@
         },
         "cover_context": {
           "type": "object"
+        },
+        "style_reference": {
+          "type": "object",
+          "required": [
+            "source",
+            "category",
+            "template_id"
+          ],
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "template_id": {
+              "type": "string"
+            },
+            "styles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "scenes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example_case_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "adaptation_reason": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
         }
       },
       "additionalProperties": true,
