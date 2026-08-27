@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -15,9 +16,10 @@ def run_validator(article: Path):
 
 
 def body_with_length(length: int, prefix: str = '') -> str:
-    if len(prefix) > length:
+    visible_prefix_length = len(re.sub(r'\s+', '', prefix))
+    if visible_prefix_length > length:
         raise ValueError('prefix longer than requested body length')
-    return prefix + ('测' * (length - len(prefix)))
+    return prefix + ('测' * (length - visible_prefix_length))
 
 
 def valid_sources() -> str:
@@ -116,11 +118,10 @@ def test_validator_rejects_empty_or_messy_source_items(tmp_path: Path):
 
 def test_validator_requires_blank_line_after_each_body_sentence(tmp_path: Path):
     article = tmp_path / 'article.md'
-    body = body_with_length(TARGET_BODY_LENGTH - len('第一句话。\n第二句话。\n\n'))
+    prefix = '第一句话。\n第二句话。\n\n'
+    body = body_with_length(TARGET_BODY_LENGTH, prefix)
     article.write_text(
         '# 标题\n\n'
-        '第一句话。\n'
-        '第二句话。\n\n'
         f'{body}\n\n'
         f'{valid_sources()}',
         encoding='utf-8',
