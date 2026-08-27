@@ -11,11 +11,31 @@ Parts of the generalized writing-methodology design in `fin-writing-style` were 
 
 The adapted Skill in this repository removes the original blogger identity, fixed signature/contact information, assumed personal history, and identity-specific voice requirements. It retains and generalizes reusable writing mechanisms such as topic-value checks, article archetypes, conversational rhythm, first-person truth boundaries, narrative progression, anti-AI-pattern checks, and layered quality review.
 
-MIT License text from the upstream project:
+The upstream MIT notice is reproduced below:
 
-> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to inclusion of the upstream copyright and permission notice in substantial copies or portions.
+```text
+MIT License
 
-The upstream project is provided without warranty, as described by its MIT License. See the upstream repository for the complete license text.
+Copyright (c) 2026 数字生命卡兹克
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
 ## awesome-gpt-image-2 visual routing reference
 
