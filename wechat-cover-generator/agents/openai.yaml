@@ -1,4 +1,4 @@
 interface:
   display_name: "微信公众号财经封面生成"
-  short_description: "根据文章语义生成适合公众号传播的财经封面或完整提示词"
-  default_prompt: "使用 $wechat-cover-generator 根据这篇文章生成适合微信公众号传播的财经封面。"
+  short_description: "根据文章语义和 GPT-Image2 风格路由生成适合公众号传播的财经封面或完整提示词"
+  default_prompt: "使用 $wechat-cover-generator 根据这篇文章选择合适的 GPT-Image2 视觉路由，并生成适合微信公众号传播的财经封面。"
