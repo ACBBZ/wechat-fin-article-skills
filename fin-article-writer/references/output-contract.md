@@ -1,20 +1,21 @@
 # 第 10 步：跨资产检查与最终内容包
 
-最后一步不重新发明观点，而是检查正文、标题、历史材料、正文图片、Style 结果和封面是否互相一致。
+最后一步不重新发明观点，而是检查正文、标题、历史材料、Style 结果、Source-First 正文图片和封面是否互相一致。
 
 ## 跨资产一致性
 
 至少检查：
 
 - 第 5 步事实锁 ↔ 第 6 步 Style 正文；
-- 正文 ↔ 主标题；
-- 正文 ↔ 3 个备选标题；
+- 正文 ↔ 主标题与 3 个备选标题；
 - 正文 ↔ 历史案例；
-- 正文 ↔ 正文配图；
+- 正文 ↔ `section_anchors`；
+- 正文最终来源 ↔ `image_strategy.source_visual_inventory`；
+- 正文配图 ↔ `source_id` / `source_locator` / 图注；
 - 正文 ↔ 封面；
 - 标题 ↔ 封面。
 
-典型错误包括：正文写“征求意见”，标题写“正式落地”；历史案例只是有限类比，封面却把历史事件画成当前主事件；Style 为了口语化把 17.3% 写成“接近 20%”；AI 解释图被图注写成真实现场。
+典型错误包括：正文写“征求意见”，标题写“正式落地”；Style 为了口语化把 17.3% 写成“接近 20%”；截图只保留一句而裁掉改变含义的上下文；已经找到 3 张可用来源图，却仍然为了“更丰富”生成 AI 正文图。
 
 ## 发布前强制格式校验
 
@@ -24,29 +25,49 @@
 python "$SKILL_DIR/scripts/validate_article_format.py" "/absolute/path/output/article.md"
 ```
 
-退出码必须为 `0`。如果校验失败，先按错误提示修正文，再重新运行；不得绕过校验直接上传草稿。
+退出码必须为 `0`。如果校验失败，先修正文再重新运行，不得绕过校验直接上传草稿。
 
 ## 文章交付检查
 
 - 正文可见文本 3000–3600 字，推荐 3200–3400；
-- 默认不要求 `##` 小标题，使用小标题时必须来自文章原型需要，而不是机器模板；
-- 至少 3 张 `AUTO_INSERT` 正文图片，通常 3–5 张；
-- 所有正文图片路径以 `.png` 结尾；
-- 每张自动插入图片绑定存在于 `section_anchors` 中的 `anchor_id`；
-- 图片角色、图注、来源、生成方式和权利状态齐全；
-- AI 解释视觉明确不冒充新闻现场或原始证据；
+- 默认不要求 `##` 小标题；
+- 至少 3 张 `AUTO_INSERT` 正文 PNG 图片，通常 3–5 张；
+- 每张自动插入图片绑定有效 `anchor_id`；
+- `image_strategy.mode` 必须为 `source_first`；
+- 最终 `sources` 中每一个来源都进入 `source_visual_inventory`，并完成视觉检查；
+- `source_capture` / `source_asset` / `source_derived_chart` 都能通过 `source_id` 回到最终来源；
+- `source_capture` 还必须记录 `source_locator`，如 PDF 页码、表格名、网页图表名或条款位置；
+- 如果找到至少 3 张可用来源视觉，`selected_ai_image_count` 必须为 0；
+- AI 正文图只能是 `origin_kind: ai_fallback`，不能用于单纯扩充 3 张到 4–5 张；
+- `ai_fallback_used: true` 时，`source_visual_search_exhausted` 必须为 `true`，并记录具体 `ai_fallback_reason`；
+- 媒体摄影、商业图库或权利不清楚的媒体页面视觉不得因为“是文章来源”就自动转载；
+- AI 解释视觉明确不冒充新闻现场、官方文件或原始证据；
 - 历史案例保留可比与不可比边界；
 - Style 没有改变 `locked_numbers`、`locked_quotes`、反面证据和不确定性；
 - 没有输入中不存在的第一手经历；
-- 文末来源真实存在；
-- 正文每个完整句子后写入两个换行符（`\n\n`），形成独立段落和段间空行；
-- 信息来源格式统一，每条使用 `- ` 项目符号，且条目之间保留一个空白行；
-- 没有具体投资建议、收益承诺或未公开信息暗示；
-- 没有明显 AI 主持人式语言。
+- 文末来源真实存在且格式统一；
+- 没有具体投资建议、收益承诺或未公开信息暗示。
 
-## 图片数量不足时
+## v3.1 图片不足时的处理
 
-如果真实新闻图通过权利闸门后少于 3 张，不能用版权不明素材凑数。优先基于已核实事实或数据生成原创 PNG 数据图、机制图或时间线图；必要时增加明确标记为解释性资产的 AI 视觉，直到至少有 3 张 `AUTO_INSERT` 图片。
+图片不足不是直接进入 AI 生图的条件。
+
+固定补足顺序：
+
+```text
+source_capture
+→ source_asset
+→ source_derived_chart
+→ ai_fallback
+```
+
+具体执行：
+
+1. 先检查最终所有信息来源的网页、PDF、公告、财报、数据页和附件；
+2. 有 3 张合适来源视觉时立即满足最低要求，AI 正文图为 0；
+3. 只有 2 张来源视觉时，优先用已核实来源数据制作第 3 张图；
+4. 来源截图、来源原始资产与来源数据图合计仍不足 3 张时，才允许 AI 补最低数量缺口；
+5. AI 不用于把已经满足最低要求的 3 张图扩充成 4–5 张。
 
 ## 最终文件结构
 
@@ -55,13 +76,15 @@ output/
 ├── article.md
 ├── cover.png                    # 封面成功时存在
 ├── images/
-│   ├── 01-primary-evidence.png
-│   ├── 02-mechanism.png
-│   ├── 03-context.png
-│   ├── 04-extra.png             # 可选
-│   └── 05-extra.png             # 可选
+│   ├── 01-source-evidence.png
+│   ├── 02-source-data.png
+│   ├── 03-source-context.png
+│   ├── 04-source-extra.png      # 有额外来源视觉时可选
+│   └── 05-source-extra.png      # 有额外来源视觉时可选
 └── article-package.json
 ```
+
+如果某张确实需要 AI fallback，文件名可以清楚标识，例如 `03-ai-fallback.png`，不要把生成图伪装成 `source-*`。
 
 ## `article.md` 最低结构
 
@@ -72,21 +95,21 @@ output/
 
 开篇正文……
 
-![配图1](images/01-primary-evidence.png)
+![配图1](images/01-source-evidence.png)
 
-*图：……来源：……*
-
-正文继续……
-
-![配图2](images/02-mechanism.png)
-
-*图：……本账号整理/绘制。*
+*图：交易所公告关键条款。来源：某交易所。*
 
 正文继续……
 
-![配图3](images/03-context.png)
+![配图2](images/02-source-data.png)
 
-*图：……来源：……*
+*图：公司半年报收入分部表。来源：公司半年报。*
+
+正文继续……
+
+![配图3](images/03-source-context.png)
+
+*图：历史安排原始材料。来源：某官方机构。*
 
 结尾……
 
@@ -99,7 +122,7 @@ output/
 - 机构：《标题》，YYYY年M月D日。
 ```
 
-图片实际插入位置由 `section_anchors` 的语义决定，不以这个示例的固定顺序为硬约束。
+图片实际插入位置由 `section_anchors` 的语义决定。
 
 ## 信息来源排版规范
 
@@ -112,7 +135,8 @@ output/
 - 禁止 `•`、数字编号、空白项目或仅含标点的来源行；
 - 同一来源重复支撑多处正文时只列一次，除非是同一机构的不同文件；
 - 优先按正文首次出现顺序排列；
-- URL、证据层级和内部核查信息保留在 `article-package.json`。
+- URL、证据层级和内部核查信息保留在 `article-package.json`；
+- 机器包中的最终来源最好包含稳定 `id`，供图片的 `source_id` 回指。
 
 ## 机器内容包
 
@@ -121,45 +145,66 @@ output/
 - 选题、主标题、3 个备选标题；
 - 核心事件、核心判断、读者利益；
 - 当前研究、历史研究、反面证据；
-- `style`：Skill、状态、文章原型、tone、第一人称设置和质量结果；
-- `article.path` 与 `article.visible_char_count`；
+- `style` 与 `article.visible_char_count`；
 - `section_anchors`；
-- 正文图片资产；
+- `image_strategy`；
+- 正文 `images` 资产；
 - 封面状态、`cover_context` 和 `style_reference`；
-- 来源清单；
+- 带稳定 `id` 的来源清单；
 - 微信草稿状态。
 
-示例：
+Source-First 示例：
 
 ```yaml
-style:
-  skill: fin-writing-style
-  status: generated
-  article_type: research_analysis
-  tone_intensity: natural
-  first_person: true
-  quality:
-    l1: pass
-    l2: pass
-    l3: pass
-    l4: pass
-article:
-  path: article.md
-  visible_char_count: 3318
-section_anchors:
-  - id: anchor_event
-    purpose: current_event
-  - id: anchor_mechanism
-    purpose: mechanism
-  - id: anchor_context
-    purpose: historical_or_data_context
+image_strategy:
+  mode: source_first
+  target_source_ratio: 1.0
+  source_visual_search_exhausted: true
+  source_visual_count: 4
+  selected_source_image_count: 3
+  selected_ai_image_count: 0
+  ai_fallback_used: false
+  source_visual_inventory:
+    - source_id: SRC01
+      source_title: "交易所公告"
+      source_url: "https://..."
+      source_type: official_primary
+      inspected: true
+      usable_visuals: 2
+    - source_id: SRC02
+      source_title: "公司半年报"
+      source_url: "https://..."
+      source_type: official_primary
+      inspected: true
+      usable_visuals: 2
+images:
+  - id: IMG01
+    path: images/01-source-evidence.png
+    anchor_id: anchor_event
+    role: primary_evidence
+    origin_kind: source_capture
+    generation_kind: documentary
+    source_id: SRC01
+    source_url: "https://..."
+    source_locator: "PDF 第 3 页"
+    copyright_status: AUTO_INSERT
+  - id: IMG02
+    path: images/02-source-data.png
+    anchor_id: anchor_mechanism
+    role: primary_evidence
+    origin_kind: source_capture
+    generation_kind: documentary
+    source_id: SRC02
+    source_url: "https://..."
+    source_locator: "半年报第 18 页收入分部表"
+    copyright_status: AUTO_INSERT
 ```
 
-所有 `AUTO_INSERT` 正文图片必须记录 `path`、`anchor_id`、`role`、`generation_kind`、来源/生成说明、图注和权利状态。候选图片可以继续留在包里，但不能出现在 `article.md`。
+如果使用 `origin_kind: ai_fallback`，该图片必须记录 `ai_fallback_reason`，同时顶层 `image_strategy` 也必须记录 fallback 原因和来源搜索已耗尽状态。
 
 ## 封面失败
 
-封面为 `prompt_only` 或 `failed` 时，文章和至少 3 张正文 PNG 图片仍然正常交付。封面失败不能成为跳过正文配图要求的理由。
+封面为 `prompt_only` 或 `failed` 时，文章和至少 3 张正文 PNG 图片仍然正常交付。封面是否 AI 生成与正文 Source-First 规则相互独立。
 
 ## 第 11 步上传产物
 
