@@ -41,6 +41,61 @@ def test_schema_requires_three_auto_insert_images_with_anchor_ids():
     assert 'explanatory_visual' in roles
 
 
+def test_schema_requires_v31_source_first_image_strategy():
+    schema = load_schema()
+    assert 'image_strategy' in schema['required']
+
+    strategy = schema['properties']['image_strategy']
+    required = set(strategy['required'])
+    assert {
+        'mode',
+        'target_source_ratio',
+        'source_visual_search_exhausted',
+        'source_visual_inventory',
+        'source_visual_count',
+        'ai_fallback_used',
+    } <= required
+    assert strategy['properties']['mode']['const'] == 'source_first'
+    assert strategy['properties']['target_source_ratio']['minimum'] == 0.67
+
+    inventory = strategy['properties']['source_visual_inventory']
+    assert inventory['type'] == 'array'
+    assert {'source_id', 'source_title', 'source_url', 'inspected', 'usable_visuals'} <= set(
+        inventory['items']['required']
+    )
+
+
+def test_schema_tracks_image_origin_and_ai_fallback_evidence():
+    schema = load_schema()
+    image_item = schema['properties']['images']['items']
+    props = image_item['properties']
+
+    assert 'origin_kind' in image_item['required']
+    assert set(props['origin_kind']['enum']) == {
+        'source_capture',
+        'source_asset',
+        'source_derived_chart',
+        'ai_fallback',
+    }
+    assert 'source_id' in props
+    assert 'source_locator' in props
+    assert 'ai_fallback_reason' in props
+
+    conditionals = image_item['allOf']
+    assert any('source_id' in rule.get('then', {}).get('required', []) for rule in conditionals)
+    assert any('ai_fallback_reason' in rule.get('then', {}).get('required', []) for rule in conditionals)
+
+
+def test_ai_fallback_requires_exhausted_source_search():
+    schema = load_schema()
+    strategy = schema['properties']['image_strategy']
+    fallback_rule = strategy['allOf'][0]
+
+    assert fallback_rule['if']['properties']['ai_fallback_used']['const'] is True
+    assert fallback_rule['then']['properties']['source_visual_search_exhausted']['const'] is True
+    assert 'ai_fallback_reason' in fallback_rule['then']['required']
+
+
 def test_cover_schema_carries_style_reference():
     schema = load_schema()
     cover = schema['properties']['cover']
