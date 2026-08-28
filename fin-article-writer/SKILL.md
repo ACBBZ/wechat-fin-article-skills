@@ -1,13 +1,13 @@
 ---
 name: fin-article-writer
-description: 当需要把中文财经或投资选题写成经过研究、核查、作者型长文表达、标题包装、正文配图和封面包装的微信公众号文章时使用。
+description: 当需要把中文财经或投资选题写成经过研究、核查、作者型长文表达、来源优先正文配图和封面包装的微信公众号文章时使用。
 ---
 
 # 财经公众号文章写作编排器
 
 ## 定位
 
-把一个财经选题加工成可发布的微信公众号内容包。研究层保持专业财经媒体式的严谨、证据意识和反向验证；表达层通过独立的 `fin-writing-style` 生成 3000–3600 字、具有第一人称作者感和自然叙事节奏的长文；传播层负责标题；证据层负责真实新闻图、官方资料图和数据图；视觉层通过独立的 `wechat-cover-generator` 生成封面；交付层通过独立的 `wechat-draft-uploader` 把最终文章、正文 PNG 配图和封面创建为微信公众号草稿。
+把一个财经选题加工成可发布的微信公众号内容包。研究层保持专业财经媒体式的严谨、证据意识和反向验证；表达层通过独立的 `fin-writing-style` 生成 3000–3600 字、具有第一人称作者感和自然叙事节奏的长文；传播层负责标题；正文视觉层实行 **Source-First**，优先把文章实际引用的信息来源直接截图、截取或提取成正文图片；封面层通过独立的 `wechat-cover-generator` 生成传播视觉；交付层通过独立的 `wechat-draft-uploader` 创建微信公众号草稿。
 
 ## 不可妥协的规则
 
@@ -20,11 +20,15 @@ description: 当需要把中文财经或投资选题写成经过研究、核查�
 - 默认**不要求 `##` 小标题**。只有明确的 N 条经验、教程或方法论文章才允许按表达需要使用可见分段标题。
 - 正文仍实行“每个完整句子单独成段并留空行”的移动端排版规则；完整句子结束后使用两个换行符（`\n\n`）。
 - 正文必须至少插入 **3 张**可自动使用的配图，通常 3–5 张，统一保存为 **`.png`**。
-- 配图通过 `section_anchors` / `anchor_id` 与文章语义绑定，不再依赖固定小标题位置。
-- 如果找不到足够版权与来源都可自动使用的真实新闻图，不得用版权不明图片凑数；应使用已核实事实或数据生成原创 PNG 数据图、机制图、时间线图，补足到至少 3 张。
+- 配图通过 `section_anchors` / `anchor_id` 与文章语义绑定，不依赖固定小标题位置。
+- **正文配图默认目标是 100% 来自最终信息来源。** 在考虑生成任何正文视觉之前，必须逐个检查最终 `sources` 中的来源页面、PDF、公告、财报、数据页及其附件，建立 `source_visual_inventory`。
+- 如果找到至少 3 张高相关、权利状态允许自动使用的来源视觉，正文 AI 配图数量必须为 **0**；不得为了把图片从 3 张扩到 4–5 张而额外生 AI 图。
+- 来源视觉不足时，先用来源中已核实的数据制作 `source_derived_chart`；只有来源截图、来源资产和来源数据图仍无法达到最低 3 张时，才允许 `ai_fallback`。
+- 使用任何 `ai_fallback` 前，`source_visual_search_exhausted` 必须为 `true`，并记录具体 `ai_fallback_reason`。
+- 同一语义位置存在可用来源图时，不能仅因 AI 图“更好看”而替换来源图。
 - 第 6 步 Style Skill 只允许改变表达，不得改变事实、数字、因果强度、不确定性、反面证据或核心判断。
 - 第一人称观察与判断可以增强作者感；第一人称亲历只允许来自用户明确提供的 `author_experience`，不得自行编造。
-- 权利状态不明确的图片不能自动进入发布稿。
+- 权利状态不明确的图片不能自动进入发布稿。“它属于文章信息来源”不等于“图片可以自动转载”。
 - AI 生成图片不能冒充新闻现场、公告原件或真实证据。
 - 封面生成失败不影响文章本身交付。
 - 第 11 步只允许创建微信公众号草稿，不得群发、正式发布或删除；实际上传前必须先 dry-run。
@@ -39,6 +43,8 @@ description: 当需要把中文财经或投资选题写成经过研究、核查�
 ### 第 1 步：当前事件、历史脉络与反面证据研究
 
 读取 `references/credible_sources.md` 与 `references/research-history.md`。建立 `research_context`，至少包括：当前事件、原始文件、关键事实、直接前史、历史异常案例、同机制案例、历史应对、反面证据、核心问题和暂定判断。
+
+研究时为来源分配稳定 `source_id`，例如 `SRC01`、`SRC02`。后续正文图片必须通过 `source_id` 回指最终来源清单。
 
 ### 第 2 步：专业分析稿
 
@@ -118,23 +124,49 @@ style_result:
 
 读取 `references/title-packaging.md`。内部生成 8–12 个候选，执行事实一票否决和加权评分，最终交付 1 个主标题 + 3 个备选标题。
 
-### 第 8 步：正文配图
+### 第 8 步：Source-First 正文配图
 
-读取 `references/article-images.md` 与 `references/compliance_guide.md`。基于第 6 步返回的 `section_anchors` 规划图片。最终正文必须至少有 3 张 `AUTO_INSERT` PNG，通常 3–5 张。
+读取 `references/article-images.md` 与 `references/compliance_guide.md`。基于第 6 步返回的 `section_anchors` 规划图片，但**先找来源图，再决定图片角色**，不能先决定“我要一张 AI 机制图”再去找理由。
 
-优先顺序：当前事件原始证据、官方公开资料、历史新闻证据、基于已核实数据生成的原创图、用于机制解释的原创视觉。生成图必须标明其解释性角色，不得伪装成真实新闻证据。
+按以下顺序执行：
+
+1. 固定最终 `sources`，确保每个来源有 `source_id`、标题、URL 和证据层级；
+2. 逐个打开最终来源，检查 HTML 正文、figure、表格、官方图片、附件以及 PDF 中与正文引用事实对应的页面；
+3. 建立 `source_visual_inventory`，记录每个来源是否检查、可自动使用视觉数量、候选视觉数量和位置；
+4. 优先选择 `source_capture` 和 `source_asset`，与 `section_anchors` 绑定；
+5. 如果直接来源视觉不足 3 张，再检查是否能基于来源数据制作 `source_derived_chart`；
+6. 只有前三类仍不足 3 张时，才把 `source_visual_search_exhausted` 设为 `true` 并允许 `ai_fallback`；
+7. 一旦已经有 3 张高质量来源/来源衍生图片，就停止为了数量继续生图。
+
+选择优先级：
+
+```text
+source_capture
+→ source_asset
+→ source_derived_chart
+→ ai_fallback
+```
+
+AI fallback 只补最低数量缺口，不负责把 3 张扩充成 4–5 张。
 
 ### 第 9 步：封面生成
 
 **必须调用子 Skill：** `wechat-cover-generator`。
 
-按照 `references/cover-contract.md` 生成 `cover_context`，调用封面 Skill，并记录 `generated | prompt_only | failed`。Cover Skill 使用 `awesome-gpt-image-2` 的结构化风格路由思想选择模板与视觉语言，但事实约束和禁用视觉始终优先。
+按照 `references/cover-contract.md` 生成 `cover_context`，调用封面 Skill，并记录 `generated | prompt_only | failed`。Cover Skill 可以继续使用 `awesome-gpt-image-2` 的结构化风格路由，因为封面是传播资产，不承担正文证据职责。
 
-正文配图规则与封面规则互不替代：封面不计入“至少 3 张正文配图”。
+正文 Source-First 配图规则与封面规则互不替代：封面不计入“至少 3 张正文配图”，封面可以 AI 生成也不会改变正文图片的来源优先要求。
 
 ### 第 10 步：跨资产一致性与打包
 
-读取 `references/output-contract.md`。检查正文、标题、历史材料、正文图片和封面是否互相一致，再写出人类可读的文章和机器可读的内容包。
+读取 `references/output-contract.md`。检查正文、标题、历史材料、正文图片、`image_strategy` 和封面是否互相一致，再写出人类可读的文章和机器可读的内容包。
+
+至少确认：
+
+- 所有最终来源都出现在 `source_visual_inventory`，且 `inspected: true`；
+- 每张 `source_capture` / `source_asset` / `source_derived_chart` 都能通过 `source_id` 回到最终来源；
+- 如果 `ai_fallback_used: true`，则 `source_visual_search_exhausted: true` 且存在具体 fallback 原因；
+- 如果已经有 3 张可用来源视觉，不存在不必要的 AI 正文图。
 
 交付前必须运行：
 
@@ -142,7 +174,7 @@ style_result:
 python "$SKILL_DIR/scripts/validate_article_format.py" "/absolute/path/output/article.md"
 ```
 
-只有校验通过才允许进入第 11 步。校验器会硬检查：正文 3000–3600 可见字、每个正文完整句子后至少两个换行符、信息来源使用 `- ` 项目符号、条目之间留一个空白行、无空项目与重复、格式统一。
+只有校验通过才允许进入第 11 步。校验器会硬检查：正文 3000–3600 可见字、每个正文完整句子后至少两个换行符、信息来源使用 `- ` 项目符号、条目之间留一个空白行、无空项目与重复、格式统一。`article-package.json` 另按 `references/article-package.schema.json` 记录 Source-First 图片审计信息。
 
 ### 第 11 步：微信草稿上传
 
@@ -160,7 +192,7 @@ python "$SKILL_DIR/scripts/validate_article_format.py" "/absolute/path/output/ar
 - 专业分析稿与 Style 交接：`references/writing-expression.md`
 - 反向验证与事实核查：`references/verification.md`
 - 标题包装：`references/title-packaging.md`
-- 正文配图：`references/article-images.md`
+- Source-First 正文配图：`references/article-images.md`
 - 合规与图片权利：`references/compliance_guide.md`
 - 封面交接契约：`references/cover-contract.md`
 - 最终内容包：`references/output-contract.md`
@@ -174,10 +206,10 @@ python "$SKILL_DIR/scripts/validate_article_format.py" "/absolute/path/output/ar
 
 - `output/article.md`
 - `output/article-package.json`
-- `output/images/01-primary-evidence.png`
-- `output/images/02-mechanism.png`
-- `output/images/03-context.png`
+- `output/images/01-source-evidence.png`
+- `output/images/02-source-data.png`
+- `output/images/03-source-context.png`
 - 当封面子 Skill 成功生成时写出 `output/cover.png`
 - 第 11 步运行后写出 `output/draft-result.json` 和 `output/preview.html`
 
-可以增加第 4、5 张正文配图，但所有正文配图必须是 PNG。标题评分、未采用历史案例、图片权利审核、候选图片和内部核查日志放进结构化内容包，不要默认倾倒给普通读者。
+可以增加第 4、5 张正文配图，但只有来源本身存在有价值的额外视觉时才需要增加。**不得为了达到 4–5 张而调用 AI 生图。** 所有正文配图必须是 PNG。标题评分、未采用历史案例、`source_visual_inventory`、图片权利审核、候选图片和内部核查日志放进结构化内容包，不默认倾倒给普通读者。
